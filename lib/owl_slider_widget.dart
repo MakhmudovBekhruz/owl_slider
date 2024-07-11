@@ -40,8 +40,8 @@ class _OwlSliderWidgetState extends State<OwlSliderWidget> {
   static double _infoWidgetWidth = 40;
   static double _infoWidgetHeight = 70;
 
-  double minWidthForSlider = 1;
-  double maxWidthForSlider = 2;
+  // double minWidthForSlider = 1;
+  // double maxWidthForSlider = 2;
 
   double sliderValueWidth = 1;
   int currentStep = 1;
@@ -65,10 +65,10 @@ class _OwlSliderWidgetState extends State<OwlSliderWidget> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      setState(() {
-        minWidthForSlider = getStepWidthFor(widget.minStepValue);
-        maxWidthForSlider = getStepWidthFor(widget.stepCount + 1);
-      });
+      // setState(() {
+      //   minWidthForSlider = getStepWidthFor(widget.minStepValue);
+      //   maxWidthForSlider = getStepWidthFor(widget.stepCount + 1);
+      // });
       Future.delayed(Duration(milliseconds: 300), () {
         setState(() {
           currentStep = widget.currentStepValue;
@@ -82,21 +82,20 @@ class _OwlSliderWidgetState extends State<OwlSliderWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onHorizontalDragUpdate: (details) {
+        final newWidth = sliderValueWidth + details.delta.dx;
+        if ((currentStep >= widget.stepCount && details.delta.dx > 0) ||
+            (currentStep <= widget.minStepValue && details.delta.dx < 0)) {
+          return;
+        }
+        final newStep = getStep(newWidth);
+        if (newStep < widget.minStepValue) {
+          return;
+        }
+        bool valueChanged = newStep != currentStep;
+        if (valueChanged) {
+          HapticFeedback.mediumImpact();
+        }
         setState(() {
-          final newWidth = sliderValueWidth + details.delta.dx;
-          if (newWidth < minWidthForSlider ||
-              newWidth > maxWidthForSlider ||
-              (currentStep == widget.stepCount && details.delta.dx > 0)) {
-            return;
-          }
-          final newStep = getStep(newWidth);
-          if (newStep < widget.minStepValue) {
-            return;
-          }
-          bool valueChanged = newStep != currentStep;
-          if (valueChanged) {
-            HapticFeedback.mediumImpact();
-          }
           currentStep = newStep;
           sliderValueWidth = newWidth;
           if (valueChanged) {
